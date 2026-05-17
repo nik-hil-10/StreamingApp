@@ -25,7 +25,16 @@ pipeline {
         stage('Build & Push Frontend') {
             steps {
                 script {
-                    sh "docker build -t streaming-frontend ./frontend"
+                    sh '''
+                        docker build \\
+                          --build-arg REACT_APP_AUTH_API_URL=/api/auth \\
+                          --build-arg REACT_APP_STREAMING_API_URL=/api/streaming \\
+                          --build-arg REACT_APP_STREAMING_PUBLIC_URL=/api/streaming \\
+                          --build-arg REACT_APP_ADMIN_API_URL=/api/admin \\
+                          --build-arg REACT_APP_CHAT_API_URL=/api/chat \\
+                          --build-arg REACT_APP_CHAT_SOCKET_URL=/ \\
+                          -t streaming-frontend ./frontend
+                    '''
                     sh "docker tag streaming-frontend:latest ${ECR_URI}/streaming-frontend:latest"
                     sh "docker push ${ECR_URI}/streaming-frontend:latest"
                 }
