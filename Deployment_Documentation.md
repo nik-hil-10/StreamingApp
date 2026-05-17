@@ -8,24 +8,24 @@ This document outlines the complete system architecture, configuration, and depl
 
 ```mermaid
 graph TD
-    Client[User Browser] -->|HTTP| ELB[AWS Classic Load Balancer]
-    ELB -->|NodePort 31265| Frontend[Frontend React SPA]
-    
-    subgraph EKS Cluster [Amazon EKS Cluster - ap-south-1]
-        Frontend -->|ClusterIP 3001| Auth[Auth Service]
-        Frontend -->|ClusterIP 3002| Streaming[Streaming Service]
-        Frontend -->|ClusterIP 3003| Admin[Admin Service]
-        Frontend -->|ClusterIP 3004| Chat[Chat Service]
-        
-        Auth -->|ClusterIP 27017| MongoDB[(MongoDB)]
+    Client["User Browser"] -->|HTTP| ELB["AWS Classic Load Balancer"]
+    ELB -->|Port 80| Frontend["Frontend React SPA"]
+
+    subgraph cluster["Amazon EKS Cluster - ap-south-1"]
+        Frontend -->|ClusterIP 3001| Auth["Auth Service"]
+        Frontend -->|ClusterIP 3002| Streaming["Streaming Service"]
+        Frontend -->|ClusterIP 3003| Admin["Admin Service"]
+        Frontend -->|ClusterIP 3004| Chat["Chat Service"]
+
+        Auth -->|ClusterIP 27017| MongoDB[("MongoDB")]
         Streaming --> MongoDB
         Admin --> MongoDB
         Chat --> MongoDB
     end
-    
-    Jenkins[Jenkins CI/CD Server] -->|Build & Push| ECR[Amazon ECR]
-    ECR -->|Pull Images| EKS Cluster
-    EKS Cluster -->|Metrics & Logs| CloudWatch[AWS CloudWatch]
+
+    Jenkins["Jenkins CI/CD"] -->|"Build and Push"| ECR["Amazon ECR"]
+    ECR -->|"Pull Images"| cluster
+    cluster -->|"Metrics and Logs"| CloudWatch["AWS CloudWatch"]
 ```
 
 The overall architecture is designed using a microservices pattern. We have 5 distinct services:
